@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>editor</groupId>
     <artifactId>editor</artifactId>
     <version>1.0</version>
@@ -13,6 +12,26 @@
             <id>scala-tools.org</id>
             <name>Scala-Tools Maven2 Repository</name>
             <url>http://scala-tools.org/repo-releases</url>
+        </repository>
+        <repository>
+            <id>scala-tools.org</id>
+            <name>releases</name>
+            <url>http://scala-tools.org/repo-releases</url>
+        </repository>
+        <repository>
+            <id>scala-tools.org</id>
+            <name>snapshots</name>
+            <url>http://scala-tools.org/repo-snapshots</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>ObjectWeb</id>
+            <name>ObjectWeb repository</name>
+            <url>http://maven.ow2.org/maven2</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -52,6 +71,16 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-swing</artifactId>
             <version>2.9.0-1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.specs2</groupId>
+            <artifactId>specs2_2.9.0-1</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.specs2</groupId>
+            <artifactId>specs2-scalaz-core_2.9.0-1</artifactId>
+            <version>6.0.RC2</version>
         </dependency>
     </dependencies>
 </project>
