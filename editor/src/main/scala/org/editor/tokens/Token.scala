@@ -1,5 +1,7 @@
 package org.editor.tokens
 
+import collection.immutable.HashMap
+
 /**
  * @author eav
  * Date: 14.08.11
@@ -8,15 +10,19 @@ package org.editor.tokens
 trait Token
 
 class Program( val classes: List[Clazz] ) extends Token {
-  override def toString = "Program:\n" + classes.toString()
+  private val classesByNames: Map[String, Clazz] = classes map {c => (c.name, c)} toMap
+
+  def getClassByName( name: String ) = classesByNames.get(name)
+
+  override def toString = "Program:\n" + classes.mkString("\n")
 }
 
 class Clazz( var name: String, val members: List[Member] ) extends Token {
-  override def toString = "\n\tClass " + name + ", members:" + members
+  override def toString = "\tClass " + name + ", members:\n" + members.mkString("\n")
 }
 
 trait Member extends Token
 
 class Method( var name: String ) extends Member {
-  override def toString = "\n\t\tMethod " + name
+  override def toString = "\t\tMethod " + name
 }

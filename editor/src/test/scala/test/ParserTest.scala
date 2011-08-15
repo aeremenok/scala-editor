@@ -2,6 +2,7 @@ package test
 
 import org.testng.annotations.Test
 import org.editor.SimpleJava
+import org.editor.tokens.Program
 
 /**
  * @author eav
@@ -11,13 +12,22 @@ import org.editor.SimpleJava
 class ParserTest {
   @Test
   def test( ) {
-    val p = SimpleJava.parse("""
+    val p: Program = SimpleJava.parse("""
 
     class Person {
       void getName(){}
+
+      void getAge(){}
     }
 
-    """)
+    class Account {
+      void getId(){}
+    }
+
+    """).get
     println(p)
+
+    val personClass = p.getClassByName("Person").get
+    personClass.name = "Person1"
   }
 }

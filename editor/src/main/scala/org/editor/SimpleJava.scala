@@ -2,6 +2,7 @@ package org.editor
 
 import tokens.{Method, Program, Clazz}
 import util.parsing.combinator.JavaTokenParsers
+import util.parsing.combinator.syntactical.StandardTokenParsers
 
 /**
  * @author eav
@@ -10,21 +11,21 @@ import util.parsing.combinator.JavaTokenParsers
  */
 object SimpleJava extends DebugStandardTokenParsers {
   implicit def toWrapped( name: String ) = new {
-    def !!![T]( p: Parser[T] ) = new Wrap(name, p)
+    def :?[T]( p: Parser[T] ) = new Wrap(name, p)
   }
 
   val ID  = """[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*""".r
   val NUM = """[1-9][0-9]*""".r
 
-  def program = "PROGRAM" !!!
-                clazz ^^ {case clazz: Clazz => new Program(clazz :: Nil)}
+  def program = "PROGRAM" :?
+                clazz.* ^^ {classes => new Program(classes)}
 
-  def clazz = "CLASS" !!!
-              "class" ~> ID ~ "{" ~ member <~ "}" ^^ {
-    case ~(~(name, _), member) => new Clazz(name, member :: Nil)
+  def clazz = "CLASS" :?
+              "class" ~> ID ~ "{" ~ member.* <~ "}" ^^ {
+    case ~(~(name, _), members) => new Clazz(name, members)
   }
 
-  def member = "MEMBER" !!!
+  def member = "MEMBER" :?
                "void" ~> ID <~ "(" <~ ")" <~ "{" <~ "}" ^^ {name => new Method(name.toString)}
 
   def parse( text: String ) = parseAll(program, text)
