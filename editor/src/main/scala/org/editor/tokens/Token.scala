@@ -1,6 +1,7 @@
 package org.editor.tokens
 
 import collection.immutable.HashMap
+import org.editor.RichString
 
 /**
  * @author eav
@@ -10,19 +11,19 @@ import collection.immutable.HashMap
 trait Token
 
 class Program( val classes: List[Clazz] ) extends Token {
-  private val classesByNames: Map[String, Clazz] = classes map {c => (c.name, c)} toMap
+  private val classesByNames: Map[String, Clazz] = classes map {c => (c.name.string, c)} toMap
 
   def getClassByName( name: String ) = classesByNames.get(name)
 
   override def toString = "Program:\n" + classes.mkString("\n")
 }
 
-class Clazz( var name: String, val members: List[Member] ) extends Token {
+class Clazz( var name: RichString, val members: List[Member] ) extends Token {
   override def toString = "\tClass " + name + ", members:\n" + members.mkString("\n")
 }
 
 trait Member extends Token
 
-class Method( var name: String ) extends Member {
+class Method( var name: RichString ) extends Member {
   override def toString = "\t\tMethod " + name
 }

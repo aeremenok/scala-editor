@@ -1,8 +1,8 @@
 package test
 
 import org.testng.annotations.Test
-import org.editor.SimpleJava
 import org.editor.tokens.Program
+import org.editor.{RichString, VerySimple, SimpleJava}
 
 /**
  * @author eav
@@ -28,6 +28,7 @@ class ParserTest {
     println(p)
 
     val personClass = p.getClassByName("Person").get
-    personClass.name = "Person1"
+    // todo
+    personClass.name = RichString("Person1", 0, 0)
   }
 }
