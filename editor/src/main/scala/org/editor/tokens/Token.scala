@@ -1,6 +1,5 @@
 package org.editor.tokens
 
-import collection.immutable.HashMap
 import org.editor.RichString
 
 /**
@@ -10,20 +9,44 @@ import org.editor.RichString
  */
 trait Token
 
+trait Type extends Token
+
+object Void extends Type
+
+trait Member extends Token {
+  def resolve( typeRegistry: Map[String, Type] ): List[LinkageError]
+}
+
 class Program( val classes: List[Clazz] ) extends Token {
-  private val classesByNames: Map[String, Clazz] = classes map {c => (c.name.string, c)} toMap
-
-  def getClassByName( name: String ) = classesByNames.get(name)
-
   override def toString = "Program:\n" + classes.mkString("\n")
+
+  def resolve( ): List[LinkageError] = {
+    val classRegistry: Map[String, Type] = classes map {c => (c.name.string, c)} toMap
+    val typeRegistry: Map[String, Type] = classRegistry ++ Map("void" -> Void)
+
+    classes flatMap {_.resolve(typeRegistry)}
+  }
 }
 
-class Clazz( var name: RichString, val members: List[Member] ) extends Token {
+class Clazz( val name: RichString, val members: List[Member] ) extends Type {
   override def toString = "\tClass " + name + ", members:\n" + members.mkString("\n")
+
+  def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] =
+    members flatMap {_.resolve(typeRegistry)}
 }
 
-trait Member extends Token
+class Method( val returnTypeName: RichString, val name: RichString ) extends Member {
+  var returnType: Type = _
 
-class Method( var name: RichString ) extends Member {
-  override def toString = "\t\tMethod " + name
+  override def toString = "\t\tMethod " + name + ":" + returnTypeName
+
+  def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] = {
+    typeRegistry.get(returnTypeName.string) match {
+      case Some(retType) => returnType = retType; Nil
+      case None => LinkageError("type not found: " + returnTypeName.string) :: Nil
+    }
+  }
 }
+
+case class LinkageError( name: String )
+

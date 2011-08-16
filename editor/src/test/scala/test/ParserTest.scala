@@ -2,7 +2,7 @@ package test
 
 import org.testng.annotations.Test
 import org.editor.tokens.Program
-import org.editor.{RichString, VerySimple, SimpleJava}
+import org.editor.{RichString, SimpleJava}
 
 /**
  * @author eav
@@ -11,13 +11,15 @@ import org.editor.{RichString, VerySimple, SimpleJava}
  */
 class ParserTest {
   @Test
-  def test( ) {
-    val p: Program = SimpleJava.parse("""
+  def goodClasses( ) {
+    val p: Program = new SimpleJava().parse("""
 
     class Person {
       void getName(){}
 
       void getAge(){}
+
+      Account getAccount(){}
     }
 
     class Account {
@@ -27,8 +29,23 @@ class ParserTest {
     """).get
     println(p)
 
-    val personClass = p.getClassByName("Person").get
-    // todo
-    personClass.name = RichString("Person1", 0, 0)
+    val linkageErrors = p.resolve()
+    assert(linkageErrors.isEmpty, linkageErrors)
+  }
+
+  @Test
+  def linkageErrors( ) {
+    val p: Program = new SimpleJava().parse("""
+
+    class Person {
+      Account getAccount(){}
+    }
+
+    """).get
+    println(p)
+
+    val linkageErrors = p.resolve()
+    println(linkageErrors)
+    assert(linkageErrors.size == 1, linkageErrors)
   }
 }
