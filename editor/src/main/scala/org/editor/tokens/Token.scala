@@ -13,12 +13,29 @@ trait Type extends Token
 
 object Void extends Type
 
-trait Member extends Token {
+trait Member extends Token with Visitable {
   def resolve( typeRegistry: Map[String, Type] ): List[LinkageError]
+
+  protected def children = Nil
 }
 
-class Program( val classes: List[Clazz] ) extends Token {
-  override def toString = "Program:\n" + classes.mkString("\n")
+trait Visitable {
+  def accept( v: Visitor ) {
+    v.visit(this)
+    children foreach {_.accept(v)}
+  }
+
+  protected def children: List[Visitable]
+}
+
+trait Visitor {
+  def visit( v: Visitable )
+}
+
+case class LinkageError( error: String, wrongString: RichString )
+
+class Program( val classes: List[Clazz] ) extends Token with Visitable {
+  protected def children = classes
 
   def resolve( ): List[LinkageError] = {
     val classRegistry: Map[String, Type] = classes map {c => (c.name.string, c)} toMap
@@ -26,27 +43,27 @@ class Program( val classes: List[Clazz] ) extends Token {
 
     classes flatMap {_.resolve(typeRegistry)}
   }
+
+  override def toString = "Program:\n" + classes.mkString("\n")
 }
 
-class Clazz( val name: RichString, val members: List[Member] ) extends Type {
-  override def toString = "\tClass " + name + ", members:\n" + members.mkString("\n")
+class Clazz( val name: RichString, val members: List[Member] ) extends Type with Visitable {
+  protected def children = members
 
   def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] =
     members flatMap {_.resolve(typeRegistry)}
+
+  override def toString = "\tClass " + name + ", members:\n" + members.mkString("\n")
 }
 
 class Method( val returnTypeName: RichString, val name: RichString ) extends Member {
   var returnType: Type = _
 
-  override def toString = "\t\tMethod " + name + ":" + returnTypeName
-
-  def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] = {
+  def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] =
     typeRegistry.get(returnTypeName.string) match {
       case Some(retType) => returnType = retType; Nil
-      case None => LinkageError("type not found: " + returnTypeName.string) :: Nil
+      case None => LinkageError("type not found: " + returnTypeName.string, returnTypeName) :: Nil
     }
-  }
+
+  override def toString = "\t\tMethod " + name + ":" + returnTypeName
 }
-
-case class LinkageError( name: String )
-

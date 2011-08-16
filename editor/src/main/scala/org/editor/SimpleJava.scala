@@ -9,7 +9,7 @@ import util.matching.Regex
  * Date: 13.08.11
  * Time: 22:42
  */
-class SimpleJava extends DebugStandardTokenParsers with CodeFactory {
+object SimpleJava extends DebugStandardTokenParsers with CodeFactory {
   implicit def toWrapped( name: String ) = new {
     def :?[T]( p: Parser[T] ) = new Wrap(name, p)
   }
@@ -31,6 +31,13 @@ class SimpleJava extends DebugStandardTokenParsers with CodeFactory {
   }
 
   def parse( text: String ) = parseAll(program, text)
+
+  def tryParsing( text: String )( f: Program => Unit ) {
+    parse(text) match {
+      case Success(prog: Program, _) => prog.resolve(); f(prog)
+      case _ => {}
+    }
+  }
 }
 
 trait CodeFactory {

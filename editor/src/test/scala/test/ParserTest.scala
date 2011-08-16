@@ -12,7 +12,7 @@ import org.editor.{RichString, SimpleJava}
 class ParserTest {
   @Test
   def goodClasses( ) {
-    val p: Program = new SimpleJava().parse("""
+    val p: Program = SimpleJava.parse("""
 
     class Person {
       void getName(){}
@@ -35,7 +35,7 @@ class ParserTest {
 
   @Test
   def linkageErrors( ) {
-    val p: Program = new SimpleJava().parse("""
+    val p: Program = SimpleJava.parse("""
 
     class Person {
       Account getAccount(){}
