@@ -42,30 +42,36 @@ object editorPane extends JTextPane {
   })
 
   def onChange( ) {
-    SimpleJava.tryParsing(getText) {program =>
+    SimpleJava.tryParsing(getText) {( program, errors ) =>
       getHighlighter.removeAllHighlights()
       program.accept(programVisitor)
+      errors foreach {e =>
+        highlight(e.wrongString, errorColor)
+      }
     }
   }
 
   object programVisitor extends Visitor {
     def visit( v: Visitable ) {
       v match {
-        case c: Clazz => highlight(c.name, Color.PINK)
+        case c: Clazz => highlight(c.name, classColor)
         case m: Method => {
-          highlight(m.name, Color.ORANGE)
+          highlight(m.name, methodColor)
           m.returnType match {
-            case c: Clazz => highlight(m.returnTypeName, Color.PINK)
+            case c: Clazz => highlight(m.returnTypeName, classColor)
             case _ => {}
           }
         }
         case _ => {}
       }
     }
-
-    def highlight( text: RichString, color: Color ) {
-      getHighlighter.addHighlight(text.start, text.start + text.offset, new DefaultHighlightPainter(color))
-    }
   }
 
+  val classColor  = Color.GRAY
+  val methodColor = Color.LIGHT_GRAY
+  val errorColor  = Color.RED
+
+  def highlight( text: RichString, color: Color ) {
+    getHighlighter.addHighlight(text.start, text.start + text.offset, new DefaultHighlightPainter(color))
+  }
 }

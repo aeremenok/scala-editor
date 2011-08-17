@@ -32,9 +32,12 @@ object SimpleJava extends DebugStandardTokenParsers with CodeFactory {
 
   def parse( text: String ) = parseAll(program, text)
 
-  def tryParsing( text: String )( f: Program => Unit ) {
+  def tryParsing( text: String )( f: (Program, List[LinkageError]) => Unit ) {
     parse(text) match {
-      case Success(prog: Program, _) => prog.resolve(); f(prog)
+      case Success(prog: Program, _) => {
+        val errors = prog.resolve()
+        f(prog, errors)
+      }
       case _ => {}
     }
   }
