@@ -23,7 +23,7 @@ trait Member extends Token with Visitable {
 
 case class LinkageError( error: String, wrongString: RichString )
 
-class Program( val classes: List[Clazz] ) extends Token with Visitable {
+class Program( val classes: List[Class] ) extends Token with Visitable {
   private val classRegistry: Map[String, Type] = classes map {c => (c.name.string, c)} toMap
 
   protected def children = classes
@@ -43,7 +43,7 @@ class Program( val classes: List[Clazz] ) extends Token with Visitable {
 
   private def getClassOccurences( className: String ): List[RichString] = {
     classRegistry.get(className) match {
-      case Some(clazz: Clazz) => {
+      case Some(clazz: Class) => {
         val otherOccurences = classes flatMap {_.getClassOccurences(className)}
         clazz.name :: otherOccurences
       }
@@ -54,7 +54,7 @@ class Program( val classes: List[Clazz] ) extends Token with Visitable {
   override def toString = "Program:\n" + classes.mkString("\n")
 }
 
-class Clazz( val name: RichString, val members: List[Member] ) extends Type with Visitable {
+class Class( val name: RichString, val members: List[Member] ) extends Type with Visitable {
   protected def children = members
 
   protected[tokens] def resolve( typeRegistry: Map[String, Type] ): List[LinkageError] =
@@ -78,10 +78,10 @@ class Method( val returnTypeName: RichString, val name: RichString ) extends Mem
       case None => LinkageError("type not found: " + returnTypeName.string, returnTypeName) :: Nil
     }
 
-  override def toString = "\t\tMethod " + name + ":" + returnTypeName
-
   protected[tokens] def getClassOccurences( className: String ) = returnType match {
-    case c: Clazz if ( c.name.string == className ) => returnTypeName :: Nil
+    case c: Class if ( c.name.string == className ) => returnTypeName :: Nil
     case _ => Nil
   }
+
+  override def toString = "\t\tMethod " + name + ":" + returnTypeName
 }

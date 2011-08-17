@@ -15,7 +15,8 @@ object app extends SwingApplication {
 }
 
 object appMainFrame extends MainFrame {
-  contents = Component wrap editorPane
+  title = "Simple Java Editor"
+  contents = editorPane.thisComponent
 
   minimumSize = new Dimension(600, 600)
   pack()

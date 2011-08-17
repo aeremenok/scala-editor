@@ -10,43 +10,31 @@ import util.matching.Regex
  * Time: 22:42
  */
 object SimpleJava extends DebugStandardTokenParsers with CodeFactory {
-  implicit def toWrapped( name: String ) = new {
-    def :?[T]( p: Parser[T] ) = new Wrap(name, p)
-  }
-
-  val ID  = regex1("""[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*""".r)
+  val ID  = richStringRegex("""[a-zA-Z]([a-zA-Z0-9]|_[a-zA-Z0-9])*""".r)
   val NUM = """[1-9][0-9]*""".r
 
-  def program = "PROGRAM" :?
-                clazz.* ^^ newProgram
+  def program = clazz.* ^^ newProgram
 
-  def clazz = "CLASS" :?
-              "class" ~> ID ~ "{" ~ member.* <~ "}" ^^ {
+  def clazz = "class" ~> ID ~ "{" ~ member.* <~ "}" ^^ {
     case ~(~(name, _), members) => newClass(name, members)
   }
 
-  def member = "MEMBER" :?
-               ID ~ ID <~ "(" <~ ")" <~ "{" <~ "}" ^^ {
+  def member = ID ~ ID <~ "(" <~ ")" <~ "{" <~ "}" ^^ {
     case ~(typeName, methodName) => newMethod(typeName, methodName)
   }
 
   def parse( text: String ) = parseAll(program, text)
 
-  def tryParsing( text: String )( f: (Program, List[LinkageError]) => Unit ) {
-    parse(text) match {
-      case Success(prog: Program, _) => {
-        val errors = prog.resolve()
-        f(prog, errors)
-      }
-      case _ => {}
-    }
+  def tryParsing( text: String ): Option[(Program, List[LinkageError])] = parse(text) match {
+    case Success(prog: Program, _) => Some(prog, prog.resolve())
+    case _ => None
   }
 }
 
 trait CodeFactory {
-  def newProgram( classes: List[Clazz] ) = new Program(classes)
+  def newProgram( classes: List[Class] ) = new Program(classes)
 
-  def newClass( className: RichString, classMembers: List[Member] ) = new Clazz(className, classMembers)
+  def newClass( className: RichString, classMembers: List[Member] ) = new Class(className, classMembers)
 
   def newMethod( returnType: RichString, methodName: RichString ) = new Method(returnType, methodName)
 }
@@ -60,7 +48,7 @@ case class RichString( string: String, start: Int, offset: Int ) {
 }
 
 trait DebugStandardTokenParsers extends JavaTokenParsers {
-  def regex1( r: Regex ): Parser[RichString] = new Parser[RichString] {
+  def richStringRegex( r: Regex ): Parser[RichString] = new Parser[RichString] {
     def apply( in: Input ) = {
       val source = in.source
       val offset = in.offset
@@ -77,17 +65,4 @@ trait DebugStandardTokenParsers extends JavaTokenParsers {
       }
     }
   }
-
-  class Wrap[+T]( name: String, parser: Parser[T] ) extends Parser[T] {
-    def apply( in: Input ): ParseResult[T] = {
-      val first = in.first
-      val pos = in.pos
-      val offset = in.offset
-      val t = parser.apply(in)
-      println(name + " for token " + first +
-              " at position " + pos + " offset " + offset + " returns " + t)
-      t
-    }
-  }
-
 }
