@@ -1,35 +1,17 @@
-package org.editor
+package org.editor.gui
 
-import swing.{Component, MainFrame, SwingApplication}
 import javax.swing.JTextPane
 import javax.swing.event.{DocumentEvent, DocumentListener}
-import tokens.{Method, Clazz, Visitable, Visitor}
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter
-import java.awt.{Font, Color, Dimension}
+import java.awt.{Font, Color}
+import org.editor.tokens.{Clazz, Method, Visitable, Visitor}
+import org.editor.{RichString, SimpleJava}
 
 /**
  * @author eav
  * Date: 13.08.11
  * Time: 22:31
  */
-object app extends SwingApplication {
-  def startup( args: Array[String] ) {
-    appMainFrame.visible = true
-  }
-}
-
-object appMainFrame extends MainFrame {
-  contents = Component wrap editorPane
-
-  minimumSize = new Dimension(600, 600)
-  pack()
-  centerOnScreen()
-
-  override def closeOperation( ) {
-    app.quit()
-  }
-}
-
 object editorPane extends JTextPane {
   setFont(new Font(Font.MONOSPACED, Font.BOLD, 15))
 
@@ -48,7 +30,7 @@ object editorPane extends JTextPane {
       errors foreach {e =>
         highlight(e.wrongString, errorColor)
       }
-    }
+                                   }
   }
 
   object programVisitor extends Visitor {

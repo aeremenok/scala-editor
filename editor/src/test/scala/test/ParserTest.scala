@@ -10,7 +10,7 @@ import org.editor.{RichString, SimpleJava}
  * Time: 20:26
  */
 class ParserTest {
-  @Test
+  //  @Test
   def goodClasses( ) {
     val p: Program = SimpleJava.parse("""
 
@@ -33,7 +33,7 @@ class ParserTest {
     assert(linkageErrors.isEmpty, linkageErrors)
   }
 
-  @Test
+  //  @Test
   def linkageErrors( ) {
     val p: Program = SimpleJava.parse("""
 
@@ -47,5 +47,31 @@ class ParserTest {
     val linkageErrors = p.resolve()
     println(linkageErrors)
     assert(linkageErrors.size == 1, linkageErrors)
+  }
+
+  @Test
+  def rename( ) {
+    val code = """
+
+    class Person {
+      Person getFriend(){}
+    }
+
+    """
+
+    val p: Program = SimpleJava.parse(code).get
+    println(p)
+
+    val linkageErrors = p.resolve()
+    assert(linkageErrors.isEmpty, linkageErrors)
+
+    assert(p.hasClass("Person"))
+
+    val newCode = p.renameClass("Person", "Dude", code)
+    println(newCode)
+
+    val newProgram = SimpleJava.parse(newCode).get
+    assert(newProgram.resolve().isEmpty)
+    assert(newProgram.hasClass("Dude"))
   }
 }

@@ -51,7 +51,13 @@ trait CodeFactory {
   def newMethod( returnType: RichString, methodName: RichString ) = new Method(returnType, methodName)
 }
 
-case class RichString( string: String, start: Int, offset: Int )
+case class RichString( string: String, start: Int, offset: Int ) {
+  def replace( newString: String, wholeText: String ): String = {
+    val textStart = wholeText.substring(0, start)
+    val textEnd = wholeText.substring(start + offset)
+    textStart + newString + textEnd
+  }
+}
 
 trait DebugStandardTokenParsers extends JavaTokenParsers {
   def regex1( r: Regex ): Parser[RichString] = new Parser[RichString] {
